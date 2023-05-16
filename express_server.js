@@ -64,6 +64,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+//Logout route
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+})
+
 //Editing
 app.post("/urls/:id", (req, res) => {
   //Setting longURL to newURL
