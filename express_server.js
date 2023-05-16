@@ -17,8 +17,6 @@ function generateRandomString() {
   }
   return result;
 }
-generateRandomString();
-
 
 
 const urlDatabase = {
@@ -59,6 +57,12 @@ app.post("/urls", (req, res) => {
   const templateVars = { id, longURL };
   res.render("urls_show", templateVars);
   console.log(req.body); // Log the POST request body to the console  
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect("/urls");  
 });
 
 app.get("/urls.json", (req, res) => {
