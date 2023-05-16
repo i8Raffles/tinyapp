@@ -59,6 +59,12 @@ app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console  
 });
 
+//login route
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect("/urls");
+})
+
 //Editing
 app.post("/urls/:id", (req, res) => {
   //Setting longURL to newURL
