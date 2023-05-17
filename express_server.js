@@ -97,7 +97,7 @@ app.get('/register', (req, res) => {
 //Register post route
 app.post('/register', (req, res) => {
   if (req.body.email && req.body.password) {
-    if (getUserByEmail(req.body.email) !== null) {
+    if (!getUserByEmail(req.body.email)) {
       const userID = generateRandomString();
       users[userID] = {
         id: userID,
@@ -105,13 +105,19 @@ app.post('/register', (req, res) => {
         password: req.body.password
       };
       res.cookie('user_id', userID);
-      return res.redirect('/urls');
+      res.redirect('/urls');
     } else {
       res.status(400).send('This email has already been registered.');
     }
   } else {
     res.status(400).send('Email and/or Password fields cannot be empty');
   }
+});
+
+//Login get route
+app.get('/login', (req, res) => {
+  const templateVars = {user: users[req.cookies['user_id']]};
+  res.render('urls_login', templateVars);
 });
 
 //Login route
