@@ -41,7 +41,7 @@ const urlDatabase = {
 //urls get route
 app.get("/urls", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies['user_id']],
     urls: urlDatabase,
   };
   res.render("urls_index", templateVars);
@@ -57,13 +57,17 @@ app.post("/urls", (req, res) => {
 
 //create newURL
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies['username'] };
+  const templateVars = { user: users[req.cookies['user_id']] };
   res.render("urls_new", templateVars);
 });
 
 //get route showing short and long url
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.id], username: req.cookies['username'] };
+  const templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.id], 
+    user: users[req.cookies['user_id']] 
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -77,7 +81,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //Register get route
 app.get('/register', (req, res) => {
-  const templateVars = { username: req.cookies['username'] };
+  const templateVars = { user: users[req.cookies['user_id']] };
   res.render('urls_register', templateVars);
 });
 
@@ -97,13 +101,13 @@ app.post('/register', (req, res) => {
 
 //Login route
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('email', req.body.email);
   res.redirect("/urls");
 });
 
 //Logout route
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
