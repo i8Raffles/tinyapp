@@ -18,7 +18,7 @@ function generateRandomString() {
     counter += 1;
   }
   return result;
-}
+};
 
 const users = {
   userRandomID: {
@@ -40,7 +40,7 @@ function getUserByEmail(email) {
     }
   }
   return null;
-}
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -53,6 +53,7 @@ app.get("/urls", (req, res) => {
     user: users[req.cookies['user_id']],
     urls: urlDatabase,
   };
+  console.log(req.cookies['user_id']);
   res.render("urls_index", templateVars);
 });
 
@@ -87,7 +88,6 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
-
 //Register get route
 app.get('/register', (req, res) => {
   const templateVars = { user: users[req.cookies['user_id']] };
@@ -116,21 +116,31 @@ app.post('/register', (req, res) => {
 
 //Login get route
 app.get('/login', (req, res) => {
-  const templateVars = {user: users[req.cookies['user_id']]};
+  const templateVars = { user: users[req.cookies['user_id']] };
   res.render('urls_login', templateVars);
 });
 
-//Login route
-app.post("/login", (req, res) => {
-  res.cookie('email', req.body.email);
-  res.redirect("/urls");
+//Login post route
+app.post('/login', (req, res) => {
+  const user = getUserByEmail(req.body.email);
+  if (user) {
+    if (req.body.password === user.password) {
+      res.cookie('user_id', user.id);
+      res.redirect('/urls');
+    } else {
+      res.status(403).send('You have entered the wrong password or email.');
+    }
+  } else {
+    res.status(403).send('A user with the given email could not be found.');
+  }
 });
 
 //Logout route
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
+
 
 //Editing
 app.post("/urls/:shortURL", (req, res) => {

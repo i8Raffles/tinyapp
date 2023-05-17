@@ -9,22 +9,29 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <div>
-          <% if (!user) { %>
-              <div>
-                <button class="btn btn-outline-dark" type="submit" href="/login">Login</button>
-                <button class="btn btn-outline-dark" type="submit" href="/register">Register</button>
-              </div>
-            <% } else { %>
-              <form class="form-inline" action="/logout" method="POST">
-                <div>
-                  Logged in as: <%= user.email %>
-                    <button type="submit" class="btn btn-outline-dark">Logout</button>
-                </div>
-              </form>
-              <% } %>
-        </div>
       </div>
+      
     </div>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <% if (!user) { %>
+        <div class="form-group form-inline">
+          <form class="form-inline" action="/login" method="GET">
+            <button class="btn btn-outline-dark" type="submit" href="/login">Login</button>
+          </form>
+          <form class="form-inline" action="/register" method="GET">
+            <button class="btn btn-outline-dark" type="submit" href="/register">Register</button>
+          </form>
+        </div>
+        <% } else { %>
+          <form class="form-inline" action="/logout" method="POST">
+            <div>
+              Logged in as: <%= user.email %>
+                <button type="submit" class="btn btn-outline-dark">Logout</button>
+            </div>
+          </form>
+          <% } %>
+    </div>
+  </div>
   </nav>
 </header>
