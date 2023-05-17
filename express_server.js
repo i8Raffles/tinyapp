@@ -33,6 +33,15 @@ const users = {
   },
 };
 
+function getUserByEmail(email) {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return users[user];
+    }
+  }
+  return null;
+}
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -52,7 +61,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   const templateVars = { shortURL, longURL };
-  res.render("urls_show", templateVars);  
+  res.render("urls_show", templateVars);
 });
 
 //create newURL
@@ -63,10 +72,10 @@ app.get("/urls/new", (req, res) => {
 
 //get route showing short and long url
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.id], 
-    user: users[req.cookies['user_id']] 
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.id],
+    user: users[req.cookies['user_id']]
   };
   res.render("urls_show", templateVars);
 });
@@ -88,14 +97,20 @@ app.get('/register', (req, res) => {
 //Register post route
 app.post('/register', (req, res) => {
   if (req.body.email && req.body.password) {
-    const userID = generateRandomString();
-    users[userID] = {
-      id: userID,
-      email: req.body.email,
-      password: req.body.password
-    };
-    res.cookie('user_id', userID);
-    return res.redirect('/urls');
+    if (getUserByEmail(req.body.email) !== null) {
+      const userID = generateRandomString();
+      users[userID] = {
+        id: userID,
+        email: req.body.email,
+        password: req.body.password
+      };
+      res.cookie('user_id', userID);
+      return res.redirect('/urls');
+    } else {
+      res.status(400).send('This email has already been registered.');
+    }
+  } else {
+    res.status(400).send('Email and/or Password fields cannot be empty');
   }
 });
 
