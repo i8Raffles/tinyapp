@@ -36,7 +36,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies['username'] };
+  const templateVars = { username: req.cookies['username'] };
   res.render("urls_new", templateVars);
 });
 
@@ -56,6 +56,11 @@ app.post("/urls", (req, res) => {
   const templateVars = { id, longURL };
   res.render("urls_show", templateVars);
   console.log(req.body); // Log the POST request body to the console  
+});
+//Register route
+app.get('/register', (req, res) => {
+  const templateVars = { username: req.cookies['username'] };
+  res.render('urls_register', templateVars);
 });
 
 //Login route
