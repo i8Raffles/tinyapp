@@ -124,6 +124,7 @@ app.post('/login', (req, res) => {
 //Logout route
 app.post('/logout', (req, res) => {
   res.clearCookie('session');
+  res.clearCookie('session.sig');
   res.redirect('/login');
 });
 
