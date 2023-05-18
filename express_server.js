@@ -53,22 +53,29 @@ app.get("/urls", (req, res) => {
     user: users[req.cookies['user_id']],
     urls: urlDatabase,
   };
-  console.log(req.cookies['user_id']);
   res.render("urls_index", templateVars);
 });
 
 //urls post route
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
-  const longURL = req.body.longURL;
-  const templateVars = { shortURL, longURL };
-  res.render("urls_show", templateVars);
+  if (req.cookies['user_id']) {
+    const shortURL = generateRandomString();
+    const longURL = req.body.longURL;
+    const templateVars = { shortURL, longURL };
+    res.render("urls_show", templateVars);
+  } else {
+    res.send("You can only shorten an URL if you are logged in.");
+  }
 });
 
 //create newURL
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: users[req.cookies['user_id']] };
-  res.render("urls_new", templateVars);
+  if (req.cookies['user_id']) {
+    const templateVars = { user: users[req.cookies['user_id']] };
+    return res.render("urls_new", templateVars);
+  } else {
+    return res.redirect('/login');
+  }
 });
 
 //get route showing short and long url
@@ -84,15 +91,22 @@ app.get("/urls/:shortURL", (req, res) => {
 //redirect from short url to actual long url website
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  if (longURL) {
+    return res.redirect(longURL);
+  }
+  return res.send("This short URL does not exist.")
 });
 
 
 //Register get route
 app.get('/register', (req, res) => {
-  const templateVars = { user: users[req.cookies['user_id']] };
-  res.render('urls_register', templateVars);
-});
+  if (!req.cookies['user_id']) {
+    const templateVars = { user: users[req.cookies['user_id']] };
+    return res.render('urls_register', templateVars);
+  }
+  return res.redirect('/login');
+}
+);
 
 //Register post route
 app.post('/register', (req, res) => {
@@ -116,8 +130,11 @@ app.post('/register', (req, res) => {
 
 //Login get route
 app.get('/login', (req, res) => {
-  const templateVars = { user: users[req.cookies['user_id']] };
-  res.render('urls_login', templateVars);
+  if (!req.cookies['user_id']) {
+    const templateVars = { user: users[req.cookies['user_id']] };
+    return res.render('urls_login', templateVars);
+  }
+  return res.redirect('/login');
 });
 
 //Login post route
