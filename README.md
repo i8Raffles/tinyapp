@@ -4,10 +4,10 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Screenshot of urls page"](#)
-!["Screenshot of new url page"](#)
-!["Screenshot of login page"](#)
-!["Screenshot of edit page"](#)
+!["Screenshot of urls page"](https://github.com/i8Raffles/tinyapp/blob/master/docs/urls_page.PNG?raw=true)
+!["Screenshot of new url page"](https://github.com/i8Raffles/tinyapp/blob/master/docs/new_url_page.PNG?raw=true)
+!["Screenshot of login page"](https://github.com/i8Raffles/tinyapp/blob/master/docs/login_page.PNG?raw=true)
+!["Screenshot of edit page"](https://github.com/i8Raffles/tinyapp/blob/master/docs/edit_page.PNG?raw=true)
 
 ## Dependencies
 
@@ -29,7 +29,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 Upon going to the link in getting started, you will be at the login page. To begin shortening URLs, you can click the Register button to the right and get started with an email and password of your choice.
 
-### Main Page My URLS
+### Main Page My URLs
 
 After logging in/registering, you will be able to view all your short URL's and long URL's at this page. You can create a new short url, edit and delete an already existing url of your choice
 
