@@ -12,10 +12,26 @@ app.use(cookieSession({
 
 app.use(express.urlencoded({ extended: true }));
 
+//importing helper functions
 const { urlsForUser, generateRandomString, getUserByEmail } = require('./helpers');
 
+
+// users object in the format
+// const users = {"userRandomID": {
+//     id: "userRandomID", 
+//     email: "user@example.com", 
+//     password: "purple-monkey-dinosaur"
+//   },
+//}
 const users = {};
 
+
+//url database in the format
+// const urlDatabase = {
+//   b6UTxQ: {
+//     longURL: "https://www.tsn.ca",
+//     userID: "aJ48lW",
+// }
 const urlDatabase = {};
 
 //home page to redirect to /urls or /login based on their login status
