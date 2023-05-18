@@ -18,11 +18,12 @@ const users = {};
 
 const urlDatabase = {};
 
+//home page to redirect to /urls or /login based on their login status
 app.get('/', (req, res) => {
   if (req.session.user_id) {
-    res.redirect('/urls');
+    return res.redirect('/urls');
   } else {
-    res.redirect('/login');
+    return res.redirect('/login');
   }
 });
 
@@ -35,7 +36,7 @@ app.get("/urls", (req, res) => {
   return res.render("urls_index", templateVars);
 });
 
-//urls post route
+//urls post route to shorten a url
 app.post("/urls", (req, res) => {
   const user = users[req.session.user_id];
   if (!user) {
@@ -48,7 +49,7 @@ app.post("/urls", (req, res) => {
   return res.render("urls_show", templateVars);
 });
 
-//create newURL
+//creating a new url get route
 app.get("/urls/new", (req, res) => {
   if (req.session.user_id) {
     const templateVars = { user: users[req.session.user_id] };
@@ -66,7 +67,7 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: currentUserURL[req.params.shortURL].longURL,
     user: users[req.session.user_id]
   };
-  res.render("urls_show", templateVars);
+  return res.render("urls_show", templateVars);
 });
 
 //redirect from short url to actual long url website
@@ -96,12 +97,12 @@ app.post('/register', (req, res) => {
         password: bcrypt.hashSync(req.body.password, 10)
       };
       req.session.user_id = userID;
-      res.redirect('/urls');
+      return res.redirect('/urls');
     } else {
-      res.status(400).send('This email has already been registered.');
+      return res.status(400).send('This email has already been registered.');
     }
   } else {
-    res.status(400).send('Email and/or Password fields cannot be empty');
+    return res.status(400).send('Email and/or Password fields cannot be empty');
   }
 });
 
@@ -121,7 +122,7 @@ app.post('/login', (req, res) => {
   return res.status(403).send('You have entered the wrong password or email.');
 });
 
-//Logout route
+//Logout route for user
 app.post('/logout', (req, res) => {
   res.clearCookie('session');
   res.clearCookie('session.sig');
@@ -129,7 +130,7 @@ app.post('/logout', (req, res) => {
 });
 
 
-//Editing
+//Editing a URL for user
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const user = getUserByEmail(users[req.session.user_id].email, users);
@@ -137,17 +138,17 @@ app.post("/urls/:shortURL", (req, res) => {
     return res.status(403).send("You cannot edit a URL that you do not own.");
   }
   urlDatabase[shortURL].longURL = req.body.newURL;
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
-//Deleting
+//Deleting a URL for user
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   if (req.session.user_id === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
     return res.redirect("/urls");
   }
-  res.status(403).send("You are not allowed to delete a URL that you do not own.");
+  return res.status(403).send("You are not allowed to delete a URL that you do not own.");
 });
 
 
