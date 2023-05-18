@@ -83,18 +83,20 @@ app.get("/urls", (req, res) => {
     user: users[req.cookies['user_id']],
     urls: urlsForUser(req.cookies['user_id']),
   };
-  console.log(templateVars.user);
-  res.render("urls_index", templateVars);
+  return res.render("urls_index", templateVars);
 });
 
 //urls post route
 app.post("/urls", (req, res) => {
-    const user = users[req.cookies['user_id']];
-    const shortURL = generateRandomString();
-    const longURL = req.body.longURL;
-    urlDatabase[shortURL] = {longURL: longURL, userID: user.ID};
-    const templateVars = { shortURL, longURL, user };
-    res.render("urls_show", templateVars);
+  const user = users[req.cookies['user_id']];
+  if (!user) {
+    return res.status(403).send("You can only shorten URLs if you're logged in");
+  }
+  const shortURL = generateRandomString();
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = { longURL: longURL, userID: user.id };
+  const templateVars = { shortURL, longURL, user };
+  return res.render("urls_show", templateVars);
 });
 
 //create newURL
@@ -124,7 +126,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (longURL) {
     return res.redirect(longURL);
   }
-  return res.send("This short URL does not exist.");
+  return res.status(404).send("This short URL does not exist.");
 });
 
 
@@ -185,6 +187,10 @@ app.post('/logout', (req, res) => {
 //Editing
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  const user = getUserByEmail(req.body.email);
+  if (!user) {
+    return res.status(403).send("You cannot edit a URL that you do not own.");
+  }
   //Setting longURL to newURL
   urlDatabase[shortURL].longURL = req.body.newURL;
   res.redirect("/urls");
@@ -192,7 +198,11 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //Deleting
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const user = getUserByEmail(req.body.email);
   const shortURL = req.params.shortURL;
+  if (!user) {
+    return res.status(403).send("You cannot delete a URL that you do not own.");
+  }
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
