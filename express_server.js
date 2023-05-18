@@ -1,7 +1,8 @@
+const PORT = 8080; // default port 8080
+const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 const express = require("express");
 const app = express();
-const cookieParser = require('cookie-parser');
-const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(cookieParser());
@@ -9,32 +10,32 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-  aJ48lW: {
-    id: "aJ48lW",
-    email: "hello@hello.com",
-    password: "123",
-  },
+  // userRandomID: {
+  //   id: "userRandomID",
+  //   email: "user@example.com",
+  //   password: "purple-monkey-dinosaur",
+  // },
+  // user2RandomID: {
+  //   id: "user2RandomID",
+  //   email: "user2@example.com",
+  //   password: "dishwasher-funk",
+  // },
+  // aJ48lW: {
+  //   id: "aJ48lW",
+  //   email: "hello@hello.com",
+  //   password: "123",
+  // },
 };
 
 const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
+  // b6UTxQ: {
+  //   longURL: "https://www.tsn.ca",
+  //   userID: "aJ48lW",
+  // },
+  // i3BoGr: {
+  //   longURL: "https://www.google.ca",
+  //   userID: "aJ48lW",
+  // },
 };
 
 function urlsForUser(id) {
@@ -61,20 +62,14 @@ function generateRandomString() {
 
 
 
-function getUserByEmail(email) {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return users[user];
+function getUserByEmail(email, db) {
+  for (const user in db) {
+    if (db[user].email === email) {
+      return db[user];
     }
   }
   return null;
 };
-
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 
 
 //urls get route
@@ -139,12 +134,12 @@ app.get('/register', (req, res) => {
 //Register post route
 app.post('/register', (req, res) => {
   if (req.body.email && req.body.password) {
-    if (!getUserByEmail(req.body.email)) {
+    if (!getUserByEmail(req.body.email, users)) {
       const userID = generateRandomString();
       users[userID] = {
         id: userID,
         email: req.body.email,
-        password: req.body.password
+        password: bcrypt.hashSync(req.body.password, 10)
       };
       res.cookie('user_id', userID);
       res.redirect('/urls');
@@ -164,17 +159,12 @@ app.get('/login', (req, res) => {
 
 //Login post route
 app.post('/login', (req, res) => {
-  const user = getUserByEmail(req.body.email);
-  if (user) {
-    if (req.body.password === user.password) {
-      res.cookie('user_id', user.id);
-      res.redirect('/urls');
-    } else {
-      res.status(403).send('You have entered the wrong password or email.');
-    }
-  } else {
-    res.status(403).send('A user with the given email could not be found.');
+  const user = getUserByEmail(req.body.email, users);
+  if (user && bcrypt.compareSync(req.body.password, user.password)) {
+    res.cookie('user_id', user.id);
+    return res.redirect('/urls');
   }
+  return res.status(403).send('You have entered the wrong password or email.');
 });
 
 //Logout route
@@ -187,7 +177,7 @@ app.post('/logout', (req, res) => {
 //Editing
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const user = getUserByEmail(req.body.email);
+  const user = getUserByEmail(req.body.email, users);
   if (!user) {
     return res.status(403).send("You cannot edit a URL that you do not own.");
   }
@@ -198,13 +188,12 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //Deleting
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const user = getUserByEmail(req.body.email);
   const shortURL = req.params.shortURL;
-  if (!user) {
-    return res.status(403).send("You cannot delete a URL that you do not own.");
+  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
+    return res.redirect("/urls");
   }
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
+  res.status(403).send("You are not allowed to delete a URL that you do not own.")
 });
 
 // app.get("/urls.json", (req, res) => {
