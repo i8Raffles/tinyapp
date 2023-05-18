@@ -13,6 +13,7 @@
 
 <body>
   <%- include('partials/_header') %>
+  <% if (user) { %>
     <main style="margin: 1em;">
       <h3>My URLs</h3>
       <table class="table">
@@ -31,7 +32,7 @@
                 <%= url %>
               </td>
               <td>
-                <%= urls[url] %>
+                <%= urls[url].longURL %>
               </td>
               <td>
                 <form method="POST" action="/urls/<%= url %>/delete">
@@ -42,6 +43,9 @@
                 <a class="btn btn-outline-primary" href="/urls/<%= url %>">Edit</a>
               </td>
             </tr>
+            <% } %>
+            <% } else { %>
+            <h3>You must be logged in to view URLs.</h3>
             <% } %>
         </tbody>
       </table>

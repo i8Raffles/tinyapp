@@ -13,9 +13,9 @@
       
     </div>
     <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
-    <div class="navbar-nav">
-      <% if (!user) { %>
+    <div class="navbar-nav">      
         <div class="form-group form-inline">
+          <% if (!user) { %>
           <form class="form-inline" action="/login" method="GET">
             <button class="btn btn-outline-dark" type="submit" href="/login">Login</button>
           </form>
