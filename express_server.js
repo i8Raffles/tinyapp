@@ -1,6 +1,6 @@
 const PORT = 8080; // default port 8080
 const bcrypt = require("bcryptjs");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const express = require("express");
 const app = express();
 
@@ -8,46 +8,29 @@ app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
   secret: 'the-world-is-an-amazing-place'
-}))
+}));
 
 app.use(express.urlencoded({ extended: true }));
 
-const { urlsForUser, generateRandomString, getUserByEmail } = require('./helpers')
+const { urlsForUser, generateRandomString, getUserByEmail } = require('./helpers');
 
-const users = {
-  // userRandomID: {
-  //   id: "userRandomID",
-  //   email: "user@example.com",
-  //   password: "purple-monkey-dinosaur",
-  // },
-  // user2RandomID: {
-  //   id: "user2RandomID",
-  //   email: "user2@example.com",
-  //   password: "dishwasher-funk",
-  // },
-  // aJ48lW: {
-  //   id: "aJ48lW",
-  //   email: "hello@hello.com",
-  //   password: "123",
-  // },
-};
+const users = {};
 
-const urlDatabase = {
-  // b6UTxQ: {
-  //   longURL: "https://www.tsn.ca",
-  //   userID: "aJ48lW",
-  // },
-  // i3BoGr: {
-  //   longURL: "https://www.google.ca",
-  //   userID: "aJ48lW",
-  // },
-};
+const urlDatabase = {};
+
+app.get('/', (req, res) => {
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
+});
 
 //urls get route
 app.get("/urls", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id],
-    urls: urlsForUser(req.session.user_id),
+    urls: urlsForUser(req.session.user_id, urlDatabase),
   };
   return res.render("urls_index", templateVars);
 });
@@ -77,7 +60,7 @@ app.get("/urls/new", (req, res) => {
 
 //get route showing short and long url
 app.get("/urls/:shortURL", (req, res) => {
-  const currentUserURL = urlsForUser(req.session.user_id);
+  const currentUserURL = urlsForUser(req.session.user_id, urlDatabase);
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: currentUserURL[req.params.shortURL].longURL,
@@ -140,7 +123,7 @@ app.post('/login', (req, res) => {
 
 //Logout route
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  res.clearCookie('session');
   res.redirect('/login');
 });
 
@@ -148,11 +131,10 @@ app.post('/logout', (req, res) => {
 //Editing
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const user = getUserByEmail(req.body.email, users);
+  const user = getUserByEmail(users[req.session.user_id].email, users);
   if (!user) {
     return res.status(403).send("You cannot edit a URL that you do not own.");
   }
-  //Setting longURL to newURL
   urlDatabase[shortURL].longURL = req.body.newURL;
   res.redirect("/urls");
 });
@@ -164,12 +146,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[shortURL];
     return res.redirect("/urls");
   }
-  res.status(403).send("You are not allowed to delete a URL that you do not own.")
+  res.status(403).send("You are not allowed to delete a URL that you do not own.");
 });
 
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

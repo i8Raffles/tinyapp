@@ -14,8 +14,8 @@
 <body>
   <%- include('partials/_header') %>
     <main style="margin: 1em;">
-      <h3>My URLs</h3>
       <% if (user) { %>
+        <h3>My URLs</h3>
         <table class="table">
           <thead>
             <tr>
@@ -43,12 +43,13 @@
                   <a class="btn btn-outline-primary" href="/urls/<%= url %>">Edit</a>
                 </td>
               </tr>
+              <% } %>
           </tbody>
         </table>
-        <% } %>
-          <% } else { %>
-            <h3>You must be logged in to view URLs.</h3>
-            <% } %>
+        <a class="btn btn-primary" href="/urls/new">Create New Short Link</a>
+        <% } else { %>
+          <h3>You must be logged in to view URLs.</h3>
+          <% } %>
     </main>
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
