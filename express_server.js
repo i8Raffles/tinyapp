@@ -12,6 +12,8 @@ app.use(cookieSession({
 
 app.use(express.urlencoded({ extended: true }));
 
+const { urlsForUser, generateRandomString, getUserByEmail } = require('./helpers')
+
 const users = {
   // userRandomID: {
   //   id: "userRandomID",
@@ -40,40 +42,6 @@ const urlDatabase = {
   //   userID: "aJ48lW",
   // },
 };
-
-function urlsForUser(id) {
-  userURLs = {};
-  for (const shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      userURLs[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return userURLs;
-}
-
-function generateRandomString() {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charsLength = characters.length;
-  let counter = 0;
-  while (counter < 6) {
-    result += characters.charAt(Math.floor(Math.random() * charsLength));
-    counter += 1;
-  }
-  return result;
-};
-
-
-
-function getUserByEmail(email, db) {
-  for (const user in db) {
-    if (db[user].email === email) {
-      return db[user];
-    }
-  }
-  return null;
-};
-
 
 //urls get route
 app.get("/urls", (req, res) => {
