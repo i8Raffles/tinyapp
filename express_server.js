@@ -1,11 +1,14 @@
 const PORT = 8080; // default port 8080
-const cookieParser = require('cookie-parser');
 const bcrypt = require("bcryptjs");
+const cookieSession = require('cookie-session')
 const express = require("express");
 const app = express();
 
 app.set("view engine", "ejs");
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  secret: 'the-world-is-an-amazing-place'
+}))
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -75,15 +78,15 @@ function getUserByEmail(email, db) {
 //urls get route
 app.get("/urls", (req, res) => {
   const templateVars = {
-    user: users[req.cookies['user_id']],
-    urls: urlsForUser(req.cookies['user_id']),
+    user: users[req.session.user_id],
+    urls: urlsForUser(req.session.user_id),
   };
   return res.render("urls_index", templateVars);
 });
 
 //urls post route
 app.post("/urls", (req, res) => {
-  const user = users[req.cookies['user_id']];
+  const user = users[req.session.user_id];
   if (!user) {
     return res.status(403).send("You can only shorten URLs if you're logged in");
   }
@@ -96,8 +99,8 @@ app.post("/urls", (req, res) => {
 
 //create newURL
 app.get("/urls/new", (req, res) => {
-  if (req.cookies['user_id']) {
-    const templateVars = { user: users[req.cookies['user_id']] };
+  if (req.session.user_id) {
+    const templateVars = { user: users[req.session.user_id] };
     return res.render("urls_new", templateVars);
   } else {
     return res.redirect('/login');
@@ -106,11 +109,11 @@ app.get("/urls/new", (req, res) => {
 
 //get route showing short and long url
 app.get("/urls/:shortURL", (req, res) => {
-  const currentUserURL = urlsForUser(req.cookies['user_id']);
+  const currentUserURL = urlsForUser(req.session.user_id);
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: currentUserURL[req.params.shortURL].longURL,
-    user: users[req.cookies['user_id']]
+    user: users[req.session.user_id]
   };
   res.render("urls_show", templateVars);
 });
@@ -127,7 +130,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //Register get route
 app.get('/register', (req, res) => {
-  const templateVars = { user: users[req.cookies['user_id']] };
+  const templateVars = { user: users[req.session.user_id] };
   return res.render('urls_register', templateVars);
 });
 
@@ -141,7 +144,7 @@ app.post('/register', (req, res) => {
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10)
       };
-      res.cookie('user_id', userID);
+      req.session.user_id = userID;
       res.redirect('/urls');
     } else {
       res.status(400).send('This email has already been registered.');
@@ -153,7 +156,7 @@ app.post('/register', (req, res) => {
 
 //Login get route
 app.get('/login', (req, res) => {
-  const templateVars = { user: users[req.cookies['user_id']] };
+  const templateVars = { user: users[req.session.user_id] };
   return res.render('urls_login', templateVars);
 });
 
@@ -161,7 +164,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const user = getUserByEmail(req.body.email, users);
   if (user && bcrypt.compareSync(req.body.password, user.password)) {
-    res.cookie('user_id', user.id);
+    req.session.user_id = user.id;
     return res.redirect('/urls');
   }
   return res.status(403).send('You have entered the wrong password or email.');
@@ -189,7 +192,7 @@ app.post("/urls/:shortURL", (req, res) => {
 //Deleting
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
-  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+  if (req.session.user_id === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
     return res.redirect("/urls");
   }
