@@ -37,6 +37,6 @@ After logging in/registering, you will be able to view all your short URL's and 
 
 Once you are logged in, you can click Create New URL from the navigation bar or through the Create New Short Link button from the My URLs page to create a new short url for a website of your choice.
 
-## Editing and Redirecting to Link
+### Editing and Redirecting to Link
 
 Upon adding a link you'll be taken to a page showing the long URL and a short URL link which you can follow to the actual website. Below the link you can also input a different website if you'd like to edit the website link instead.

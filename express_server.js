@@ -135,7 +135,7 @@ app.post('/login', (req, res) => {
     req.session.user_id = user.id;
     return res.redirect('/urls');
   }
-  return res.status(403).send('You have entered the wrong password or email.');
+  return res.status(403).send('You have entered invalid credentials.');
 });
 
 //Logout route for user
