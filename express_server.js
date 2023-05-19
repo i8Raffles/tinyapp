@@ -9,7 +9,6 @@ app.use(cookieSession({
   name: 'session',
   secret: 'the-world-is-an-amazing-place'
 }));
-
 app.use(express.urlencoded({ extended: true }));
 
 //importing helper functions
@@ -18,8 +17,8 @@ const { urlsForUser, generateRandomString, getUserByEmail } = require('./helpers
 
 // users object in the format
 // const users = {"userRandomID": {
-//     id: "userRandomID", 
-//     email: "user@example.com", 
+//     id: "userRandomID",
+//     email: "user@example.com",
 //     password: "purple-monkey-dinosaur"
 //   },
 //}
