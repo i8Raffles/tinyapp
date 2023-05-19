@@ -56,7 +56,8 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   const user = users[req.session.user_id];
   if (!user) {
-    return res.status(403).send("You can only shorten URLs if you're logged in");
+    const error = "You can only shorten urls if you are logged in";
+    return res.status(403).render("urls_errors", { user: user, error });
   }
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
@@ -77,29 +78,38 @@ app.get("/urls/new", (req, res) => {
 
 //get route showing short and long url
 app.get("/urls/:shortURL", (req, res) => {
-  const currentUserURL = urlsForUser(req.session.user_id, urlDatabase);
+  const currentUserURLs = urlsForUser(req.session.user_id, urlDatabase);
+  if (!currentUserURLs[req.params.shortURL]) {
+    const error = "This short URL does not exist";
+    return res.status(403).render("urls_errors", { user: users[req.session.user_id], error });
+  }
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: currentUserURL[req.params.shortURL].longURL,
-    user: users[req.session.user_id]
+    longURL: currentUserURLs[req.params.shortURL].longURL,
+    user: users[req.session.user_id],
+    currentUserURLs
   };
   return res.render("urls_show", templateVars);
 });
 
 //redirect from short url to actual long url website
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  if (longURL) {
-    return res.redirect(longURL);
+  if (urlDatabase[req.params.shortURL]) {
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
+  } else {
+    const error = 'This short URL does not exist.';
+    return res.status(404).render('urls_errors', { user: users[req.session.user_id], error });
   }
-  return res.status(404).send("This short URL does not exist.");
 });
 
 
 //Register get route
 app.get('/register', (req, res) => {
-  const templateVars = { user: users[req.session.user_id] };
-  return res.render('urls_register', templateVars);
+  if (!req.session.user_id) {
+    const templateVars = { user: users[req.session.user_id] };
+    return res.render('urls_register', templateVars);
+  }
+  return res.redirect('/urls');
 });
 
 //Register post route
@@ -115,10 +125,12 @@ app.post('/register', (req, res) => {
       req.session.user_id = userID;
       return res.redirect('/urls');
     } else {
-      return res.status(400).send('This email has already been registered.');
+      const error = 'This email has already been registered.';
+      return res.status(400).render('urls_errors', { user: users[req.session.user_id], error });
     }
   } else {
-    return res.status(400).send('Email and/or Password fields cannot be empty');
+    const error = 'Email and/or Password fields cannot be empty.';
+    return res.status(400).render('urls_errors', { user: users[req.session.user_id], error });
   }
 });
 
@@ -135,14 +147,15 @@ app.post('/login', (req, res) => {
     req.session.user_id = user.id;
     return res.redirect('/urls');
   }
-  return res.status(403).send('You have entered invalid credentials.');
+  const error = 'You have entered invalid credentials.';
+  return res.status(403).render('urls_errors', { user: users[req.session.user_id], error });
 });
 
 //Logout route for user
 app.post('/logout', (req, res) => {
   res.clearCookie('session');
   res.clearCookie('session.sig');
-  res.redirect('/login');
+  return res.redirect('/login');
 });
 
 
@@ -151,7 +164,8 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const user = getUserByEmail(users[req.session.user_id].email, users);
   if (!user) {
-    return res.status(403).send("You cannot edit a URL that you do not own.");
+    const error = 'You cannot edit a URL that you do not own.';
+    return res.status(403).render('urls_errors', { user: users[req.session.user_id], error });
   }
   urlDatabase[shortURL].longURL = req.body.newURL;
   return res.redirect("/urls");
@@ -164,7 +178,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[shortURL];
     return res.redirect("/urls");
   }
-  return res.status(403).send("You are not allowed to delete a URL that you do not own.");
+  const error = 'You are not allowed to delete a URL that you do not own.';
+  return res.status(403).render('urls_errors', { user: users[req.session.user_id], error });
 });
 
 
